@@ -103,10 +103,10 @@ Environment Variables
 The project uses a .env file for X API credentials.
 Example:
 ```
-X_API_KEY=your_api_key
-X_API_SECRET=your_api_secret
-X_ACCESS_TOKEN=your_access_token
-X_ACCESS_SECRET=your_access_secret
+X_API_KEY=api_key
+X_API_SECRET=api_secret
+X_ACCESS_TOKEN=access_token
+X_ACCESS_SECRET=access_secret
 ```
 
 ```
