@@ -108,6 +108,7 @@ X_API_SECRET=api_secret
 X_ACCESS_TOKEN=access_token
 X_ACCESS_SECRET=access_secret
 ```
+This has been changed to .env.example
 
 ```
 📁 Project Structure
