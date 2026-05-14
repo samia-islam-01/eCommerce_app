@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View My Stores</title>
+</head>
+<body>
+    <h3>My Stores</h3>
+    {% for store in stores %}
+        <p>Name: {{ store.name }}</p>
+        <p>Description: {{ store.description }}</p>
+        {% if store.logo %}
+            <p>Logo: <br> <img src="{{ store.logo.url }}" width="150"></p>
+        {% endif %}
+
+        <a href="{% url 'store:edit_store' store.id %}">
+            <button>Edit</button>
+        </a>
+
+    <form method="POST" action="{% url 'store:delete_store' store.id %}" style="display:inline;">
+        {% csrf_token %}
+            <button type="submit" onclick="return confirm('Delete this store?')">
+                Delete
+            </button>
+    <hr>
+    </form>
+    {% endfor %}
+
+    <!-- Navigation -->
+    <div style="margin-top: 20px;">
+        <a href="{% url 'store:create_product' %}">
+            <button>➕ Create Product</button>
+        </a>
+
+        <a href="{% url 'authenticator:welcome' %}">
+            <button>🏠 Back Home</button>
+        </a>
+    </div>
+</body>
+</html>

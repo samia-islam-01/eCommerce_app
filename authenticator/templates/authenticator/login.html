@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+
+    <!-- This form sends login info to the backend using POST -->
+    <form method="POST" action="{% url 'authenticator:login' %}">
+        {% csrf_token %}  <!-- Security token to prevent hacking -->
+
+        <!-- Username input -->
+        <label for="username">Username:</label>
+        <input type="text" name="username" required><br><br>
+
+        <!-- Password input -->
+        <label for="password">Password:</label>
+        <input type="password" name="password" required><br><br>
+
+        <!-- Submit button -->
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- If there's an error (like wrong password), show it -->
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <!-- Link to reset password page -->
+    <p style="margin-top: 10px;">
+        <a href="{% url 'authenticator:request_password_reset' %}">Forgot your password?</a>
+    </p>
+
+    <!-- Link to registration page -->
+    <div style="margin-top: 20px;">
+        <p>Don't have an account?
+            <a href="{% url 'authenticator:register' %}">
+                <button>Register here</button>
+            </a>
+        </p>
+    </div>
+</body>
+</html>

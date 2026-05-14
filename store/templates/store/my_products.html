@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Products</title>
+</head>
+<body>
+
+    <h1>My Products</h1>
+
+    <!-- Create new product -->
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'store:create_product' %}">
+            <button>➕ Create New Product</button>
+        </a>
+    </div>
+
+    {% if products %}
+        <table border="1" cellpadding="10">
+            <tr>
+                <th>Name</th>
+                <th>Store</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.store }}</td>
+                    <td>{{ product.description }}</td>
+
+                    {% if product.image %}
+                        <td><img src="{{ product.image.url }}" width="50"></td>
+                    {% else %}
+                    <td>No image available</td>
+                    {% endif %}
+
+                    <td>£{{ product.price }}</td>
+                    <td>{{ product.stock }}</td>
+
+                    <td>
+                        <!-- Edit -->
+                        <a href="{% url 'store:edit_product' product.id %}">
+                            <button>Edit</button>
+                        </a>
+
+                        <!-- Delete -->
+                        <a href="{% url 'store:delete_product' product.id %}">
+                            <button style="background-color:red; color:white;">
+                                Delete
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have no products yet.</p>
+    {% endif %}
+
+    <br>
+
+    <!-- Navigation -->
+    <a href="{% url 'authenticator:welcome' %}">
+        <button>🏠 Back to Home</button>
+    </a>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+</head>
+<body>
+
+<h1>Checkout</h1>
+
+{% if cart %}
+    <h3>Review Your Order</h3>
+
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+        </tr>
+
+        {% for item in cart %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <p><strong>Total: £{{ total_price }}</strong></p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Confirm Checkout</button>
+    </form>
+
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
+
+<br>
+
+<a href="{% url 'store:main_cart_page' %}">
+    <button>Back to Cart</button>
+</a>
+
+</body>
+</html>

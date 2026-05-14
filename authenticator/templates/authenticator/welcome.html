@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+    <h1>Welcome, {{ request.user.username }}!</h1>
+
+    <form method="POST" action="{% url 'authenticator:logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+
+    <hr>
+
+    <!-- Buyer actions -->
+    <h3>Shopping</h3>
+
+    <a href="{% url 'store:products_list' %}">
+        <button>🏪 Browse Products</button>
+    </a>
+
+    <a href="{% url 'store:main_cart_page' %}">
+        <button>🛒 View Cart</button>
+    </a>
+
+    <hr>
+
+    <!-- Vendor actions -->
+    {% if request.user.groups.all.0.name == "Vendors" %}
+    <h3>Vendor Dashboard</h3>
+
+    <a href="{% url 'store:my_stores' %}">
+        <button>🏬 My Stores</button>
+    </a>
+
+    <a href="{% url 'store:create_store' %}">
+        <button>➕ Create Store</button>
+    </a>
+
+    <a href="{% url 'store:my_products' %}">
+        <button>📦 My Products</button>
+    </a>
+
+    <a href="{% url 'store:create_product' %}">
+        <button>➕ Create Product</button>
+    </a>
+    {% endif %}
+
+    </body>
+</html>

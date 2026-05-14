@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Price</title>
+</head>
+<body>
+<h2>Change Product Price</h2>
+
+{% if error %}
+    <p style="color:red;">{{ error }}</p>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %}
+    <label>Product name:</label>
+    <input type="text" name="product" required><br><br>
+
+    <label>New price:</label>
+    <input type="text" name="new_price" required><br><br>
+
+    <button type="submit">Update Price</button>
+</form>
+
+<!-- Navigation Buttons -->
+<div style="margin-top: 20px;">
+    <a href="{% url 'store:products_list' %}">
+        <button>🏪 Back to Catalog</button>
+    </a>
+
+    <a href="{% url 'store:product_page' %}">
+        <button>🔍 Search Product</button>
+    </a>
+
+    <a href="{% url 'store:main_cart_page' %}">
+        <button>🛒 View Cart</button>
+    </a>
+</div>
+</body>

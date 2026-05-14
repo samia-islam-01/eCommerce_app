@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Details</title>
+</head>
+<body>
+
+<h1>{{ product.name }}</h1>
+
+<p><strong>Description:</strong> {{ product.description }}</p>
+<p><strong>Image:</strong>
+    <br>
+    <img src="{{ product.image.url }}" width="50">
+</p>
+<p><strong>Price:</strong> £{{ product.price }}</p>
+<p><strong>Stock:</strong> {{ product.stock }}</p>
+
+<hr>
+
+<h2>Reviews</h2>
+
+{% if reviews %}
+    {% for review in reviews %}
+        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+            <strong>{{ review.user.username }}</strong>
+
+            {% if review.verified %}
+                <span style="color:green;">✔ Verified Purchase</span>
+            {% else %}
+                <span style="color:red;">✘ Unverified</span>
+            {% endif %}
+
+            <p>{{ review.text }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No reviews yet.</p>
+{% endif %}
+
+<hr>
+
+<h3>Add a Review</h3>
+
+<form method="POST" action="{% url 'store:add_review' product.id %}">
+    {% csrf_token %}
+    <textarea name="text" placeholder="Write your review..." required></textarea><br><br>
+    <button type="submit">Submit Review</button>
+</form>
+
+<hr>
+
+<!-- Navigation -->
+<a href="{% url 'store:products_list' %}">
+    <button>🏪 Back to Products</button>
+</a>
+
+<a href="{% url 'store:main_cart_page' %}">
+    <button>🛒 View Cart</button>
+</a>
+
+<a href="{% url 'authenticator:welcome' %}">
+    <button>🏠 Back to Home</button>
+</a>
+
+</body>
+</html>
