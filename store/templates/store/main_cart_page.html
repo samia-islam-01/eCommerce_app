@@ -1,22 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <title>Your Shopping Cart</title>
-</head>
-<body>
-    <h1>Your Shopping Cart</h1>
+{% extends 'base.html' %}
+{% block title %}Your Cart{% endblock %}
+{% block content %}
+<h1 class="mb-4">Your Shopping Cart</h1>
 
-    {% if cart %}
-        <table border="1" cellpadding="10" cellspacing="0">
+{% if cart %}
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
             <thead>
                 <tr>
-                    <th>Product Name</th>
+                    <th>Product</th>
                     <th>Store</th>
                     <th>Description</th>
-                    <th>Image</th>
                     <th>Price</th>
-                    <th>Quantity</th>
+                    <th>Qty</th>
                     <th>Subtotal</th>
                 </tr>
             </thead>
@@ -26,51 +22,33 @@
                         <td>{{ item.product.name }}</td>
                         <td>{{ item.product.store }}</td>
                         <td>{{ item.product.description }}</td>
-                        {% if item.product.image %}
-                            <td><img src="{{ item.product.image.url }}" width="50"></td>
-                        {% else %}
-                            <td>No image available</td>
-                        {% endif %}
                         <td>£{{ item.product.price }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>£{{ item.subtotal }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr class="table-dark">
+                    <th colspan="5" class="text-end">Total</th>
+                    <th>£{{ total_price }}</th>
+                </tr>
+            </tfoot>
         </table>
-
-        <p><strong>Total Items:</strong> {{ cart|length }}</p>
-        <p><strong>Total Price:</strong> £{{ total_price }}</p>
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
-
-
-    <br>
-    <!-- Navigation Buttons -->
-
-    <div style="margin-top: 20px;">
-        <a href="{% url 'store:checkout' %}">
-            <button>✅ Checkout</button>
-        </a>
-
-        <a href="{% url 'store:products_list' %}">
-            <button>🏪 Continue Shopping</button>
-        </a>
-
-        <a href="{% url 'store:product_page' %}">
-            <button>🔍 Search Product</button>
-        </a>
-
-        <a href="{% url 'authenticator:welcome' %}">
-            <button>🏠 Back to Home</button>
-        </a>
-
-        <form method="POST" action="{% url 'store:clear_cart' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" style="background-color:red; color:white;">🗑️ Clear Cart</button>
-        </form>
     </div>
 
-</body>
-</html>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <a href="{% url 'store:checkout' %}" class="btn btn-success">✅ Checkout</a>
+        <a href="{% url 'store:products_list' %}" class="btn btn-outline-primary">🏪 Continue Shopping</a>
+        <a href="{% url 'authenticator:welcome' %}" class="btn btn-outline-dark">🏠 Home</a>
+        <form method="POST" action="{% url 'store:clear_cart' %}" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">🗑️ Clear Cart</button>
+        </form>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Your cart is empty. <a href="{% url 'store:products_list' %}">Browse products</a>.
+    </div>
+{% endif %}
+{% endblock %}

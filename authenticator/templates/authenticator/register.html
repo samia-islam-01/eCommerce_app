@@ -1,52 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
-<body>
-    <h2>Register An Account</h2>
-
-    <!-- This form sends registration info to the backend -->
-    <form method="POST" action="{% url 'authenticator:register' %}">
-        {% csrf_token %}  <!-- Protects against cross-site attacks -->
-
-        <!-- Username input -->
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-
-        <!-- Email input -->
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <br>
-
-        <!-- Password input -->
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-
-        <!-- Password confirmation -->
-        <label for="password_confirm">Re-enter password</label>
-        <input type="password" id="password_confirm" name="password_confirm" required>
-        <br>
-
-        <!-- Role choice -->
-        <label>Account Type:</label><br>
-        <input type="radio" name="role" value="buyer" required> Buyer
-        <input type="radio" name="role" value="vendor"> Vendor
-        <br>
-
-        <!-- Submit button -->
-        <button type="submit">Register</button>
-        <br>
-    </form>
-
-    <!-- Error message display -->
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-
-    <!-- Link to login page -->
-    <p>Already have an account? <a href="{% url 'authenticator:login' %}">Login here</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Create an Account</h2>
+                <form method="POST" action="{% url 'authenticator:register' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_confirm" class="form-label">Confirm Password</label>
+                        <input type="password" id="password_confirm" name="password_confirm" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Type</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="role" id="role_buyer" value="buyer" required>
+                                <label class="form-check-label" for="role_buyer">Buyer</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="role" id="role_vendor" value="vendor">
+                                <label class="form-check-label" for="role_vendor">Vendor</label>
+                            </div>
+                        </div>
+                    </div>
+                    {% if error %}
+                        <div class="alert alert-danger py-2">{{ error }}</div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+                <hr>
+                <p class="text-center mb-0">
+                    Already have an account? <a href="{% url 'authenticator:login' %}">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

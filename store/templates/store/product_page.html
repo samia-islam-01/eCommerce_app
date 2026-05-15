@@ -1,61 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <title>Product Page</title>
-</head>
-<body>
-    <h1>Product Page</h1>
+{% extends 'base.html' %}
+{% block title %}Search Product{% endblock %}
+{% block content %}
+<h1 class="mb-4">Search Product</h1>
 
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
 
-    {% if product %}
-        <h2>{{ product.name }}</h2>
-        <p><strong>Store:</strong> {{ product.store }}</p>
-        <p><strong>Description:</strong> {{ product.description }}</p>
-
-        {% if product.image %}
-            <p><strong>Image:</strong> <img src="{{ product.image.url }}" width="50"></p>
-        {% elif not product.image %}
-            <td>No image available</td>
-        {% endif %}
-
-        <p><strong>Price:</strong> £{{ product.price }}</p>
-        <p><strong>Stock:</strong> {{ product.stock }}</p>
-
-        <br>
-        <p><strong>Add to Cart:</strong></p>
-        <form method="POST" action="{% url 'store:add_to_cart' %}">
-            {% csrf_token %}
-            <input type="hidden" name="item" value="{{ product.name }}">
-            <input type="number" name="quantity" value="1" min="1" style="width: 50px;" />
-            <button type="submit">Add</button>
-        </form>
-    {% else %}
-        <form method="POST">
-            {% csrf_token %}
-            <label for="product">Enter product name:</label>
-            <input type="text" id="product" name="product" required />
-            <button type="submit">View Product</button>
-        </form>
-    {% endif %}
-
-    <br>
-    <!-- Navigation Buttons -->
-    <div style="margin-top: 20px;">
-        <a href="{% url 'store:products_list' %}">
-            <button>🏪 Back to Catalog</button>
-        </a>
-
-        <a href="{% url 'store:main_cart_page' %}">
-            <button>🛒 View Cart</button>
-        </a>
-
-        <a href="{% url 'authenticator:welcome' %}">
-            <button>🏠 Back to Home</button>
-        </a>
+{% if product %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">{{ product.name }}</h2>
+            <p><strong>Store:</strong> {{ product.store }}</p>
+            <p><strong>Description:</strong> {{ product.description }}</p>
+            <p><strong>Price:</strong> £{{ product.price }}</p>
+            <p>
+                <strong>Stock:</strong>
+                {% if product.stock > 0 %}
+                    <span class="badge bg-success">{{ product.stock }}</span>
+                {% else %}
+                    <span class="badge bg-danger">Out of stock</span>
+                {% endif %}
+            </p>
+            {% if product.stock > 0 %}
+            <form method="POST" action="{% url 'store:add_to_cart' %}" class="d-flex gap-2 align-items-center mt-3">
+                {% csrf_token %}
+                <input type="hidden" name="item" value="{{ product.name }}">
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width:80px;">
+                <button type="submit" class="btn btn-primary">Add to Cart</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
-</body>
-</html>
+{% else %}
+    <form method="POST" class="d-flex gap-2 mb-4">
+        {% csrf_token %}
+        <input type="text" id="product" name="product" class="form-control" placeholder="Enter product name" required>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+{% endif %}
+
+<div class="d-flex gap-2 mt-3">
+    <a href="{% url 'store:products_list' %}" class="btn btn-outline-secondary">🏪 Back to Catalog</a>
+    <a href="{% url 'store:main_cart_page' %}" class="btn btn-outline-primary">🛒 View Cart</a>
+    <a href="{% url 'authenticator:welcome' %}" class="btn btn-outline-dark">🏠 Home</a>
+</div>
+{% endblock %}

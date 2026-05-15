@@ -1,54 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Product</title>
-</head>
-<body>
-
-    <h2>Edit Product</h2>
-
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
-
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <label>Product Name:</label><br>
-        <input type="text" name="name" value="{{ product.name }}" required><br><br>
-
-        <label>Description:</label><br>
-        <textarea name="description">{{ product.description }}</textarea><br><br>
-
-        <label>Product Image:</label><br>
-        <input type="file" name="image" accept="image" required><br><br>
-
-        <label>Price:</label><br>
-        <input type="text" name="price" value="{{ product.price }}" required><br><br>
-
-        <label>Stock:</label><br>
-        <input type="number" name="stock" value="{{ product.stock }}" required><br><br>
-
-        <button type="submit">Update Product</button>
-    </form>
-
-    <br>
-
-    <!-- Navigation -->
-    <div style="margin-top: 20px;">
-        <a href="{% url 'store:products_list' %}">
-            <button>🏪 Back to Catalog</button>
-        </a>
-
-        <a href="{% url 'store:create_product' %}">
-            <button>➕ Create Product</button>
-        </a>
-
-        <a href="{% url 'store:main_cart_page' %}">
-            <button>🛒 View Cart</button>
-        </a>
+{% extends 'base.html' %}
+{% block title %}Edit Product{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Edit Product</h2>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="name" value="{{ product.name }}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3">{{ product.description }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Price (&pound;)</label>
+                            <input type="text" name="price" value="{{ product.price }}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock</label>
+                            <input type="number" name="stock" value="{{ product.stock }}" class="form-control" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Product Image <span class="text-muted">(optional)</span></label>
+                        {% if product.image %}
+                            <div class="mb-2">
+                                <img src="{{ product.image.url }}" alt="Current image" style="max-height:100px;" class="rounded">
+                                <small class="d-block text-muted">Upload a new image to replace the current one.</small>
+                            </div>
+                        {% endif %}
+                        <input type="file" name="image" accept="image/*" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    <a href="{% url 'store:my_products' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
     </div>
-
-</body>
-</html>
+</div>
+{% endblock %}

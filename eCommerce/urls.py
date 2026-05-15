@@ -8,6 +8,4 @@ urlpatterns = [
     path('', include('authenticator.urls')),
     path('ecommerce/', include('store.urls')),
     path('api/', include('store.api_urls')),
-]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

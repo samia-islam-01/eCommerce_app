@@ -15,5 +15,4 @@ urlpatterns = [
     # Cart & Checkout
     path('cart/', api_views.CartView.as_view(), name='api_cart'),
     path('checkout/', api_views.CheckoutView.as_view(), name='api_checkout'),
-    path('stores/<int:store_id>/products/', api_views.StoreProductsView.as_view(), name='api_store_products'),
 ]

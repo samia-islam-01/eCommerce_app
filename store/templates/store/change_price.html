@@ -1,39 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Product Price</title>
-</head>
-<body>
-<h2>Change Product Price</h2>
-
-{% if error %}
-    <p style="color:red;">{{ error }}</p>
-{% endif %}
-
-<form method="POST">
-    {% csrf_token %}
-    <label>Product name:</label>
-    <input type="text" name="product" required><br><br>
-
-    <label>New price:</label>
-    <input type="text" name="new_price" required><br><br>
-
-    <button type="submit">Update Price</button>
-</form>
-
-<!-- Navigation Buttons -->
-<div style="margin-top: 20px;">
-    <a href="{% url 'store:products_list' %}">
-        <button>🏪 Back to Catalog</button>
-    </a>
-
-    <a href="{% url 'store:product_page' %}">
-        <button>🔍 Search Product</button>
-    </a>
-
-    <a href="{% url 'store:main_cart_page' %}">
-        <button>🛒 View Cart</button>
-    </a>
+{% extends 'base.html' %}
+{% block title %}Change Product Price{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Change Product Price</h2>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="product" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Price (£)</label>
+                        <input type="text" name="new_price" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Price</button>
+                </form>
+                <div class="d-flex gap-2 mt-3">
+                    <a href="{% url 'store:products_list' %}" class="btn btn-outline-secondary">🏪 Catalog</a>
+                    <a href="{% url 'store:main_cart_page' %}" class="btn btn-outline-primary">🛒 Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-</body>
+{% endblock %}

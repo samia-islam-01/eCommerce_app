@@ -1,87 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Product Catalog</title>
-</head>
-<body>
-    <h1>Product Catalog</h1>
+{% extends 'base.html' %}
+{% block title %}Product Catalog{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Product Catalog</h1>
+    <div>
+        <a href="{% url 'store:main_cart_page' %}" class="btn btn-outline-primary me-2">🛒 Cart</a>
+        <a href="{% url 'store:product_page' %}" class="btn btn-outline-secondary">🔍 Search</a>
+    </div>
+</div>
 
-    {% if products %}
-        <table border="1" cellpadding="10" cellspacing="0">
+{% if products %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
             <thead>
                 <tr>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Store</th>
                     <th>Description</th>
-                    <th>Image</th>
                     <th>Price</th>
+                    <th>Stock</th>
                     <th>Add to Cart</th>
-                    <th>Actions</th>
+                    <th>Details</th>
+                    {% if is_vendor %}<th>Actions</th>{% endif %}
                 </tr>
             </thead>
             <tbody>
                 {% for product in products %}
                     <tr>
+                        <td>
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height:50px;">
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.store }}</td>
                         <td>{{ product.description }}</td>
-
-                        {% if product.image %}
-                            <td><img src="{{ product.image.url }}" width="50"></td>
-                        {% elif not product.image %}
-                            <td>No image available</td>
-                        {% endif %}
-
                         <td>£{{ product.price }}</td>
                         <td>
-                            <form method="POST" action="{% url 'store:add_to_cart' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="item" value="{{ product.name }}">
-                                <input type="number" name="quantity" value="1" min="1" style="width: 50px;" />
-                                <button type="submit">Add</button>
-                            </form>
+                            {% if product.stock > 0 %}
+                                <span class="badge bg-success">{{ product.stock }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">Out of stock</span>
+                            {% endif %}
                         </td>
                         <td>
-                            <p>Link to product:
-                            <a href="{% url 'store:product_detail' product.id %}">
-                                {{ product.name }}
-                            </a>
-                            </p>
-
-                            <a href="{% url 'store:delete_product' product.id %}">
-                                <button>Delete</button>
-                            </a>
-
-                            <a href="{% url 'store:edit_product' product.id %}">
-                                <button>Edit</button>
-                            </a>
+                            {% if product.stock > 0 %}
+                            <form method="POST" action="{% url 'store:add_to_cart' %}" class="d-flex gap-1">
+                                {% csrf_token %}
+                                <input type="hidden" name="item" value="{{ product.name }}">
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control form-control-sm" style="width:65px;">
+                                <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                            </form>
+                            {% else %}
+                                <span class="text-muted small">Unavailable</span>
+                            {% endif %}
                         </td>
+                        <td>
+                            <a href="{% url 'store:product_detail' product.id %}" class="btn btn-outline-secondary btn-sm">View</a>
+                        </td>
+                        {% if is_vendor %}
+                        <td>
+                            <a href="{% url 'store:edit_product' product.id %}" class="btn btn-warning btn-sm me-1">Edit</a>
+                            <a href="{% url 'store:delete_product' product.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-    {% else %}
-        <p>No products available.</p>
-    {% endif %}
-
-    <br>
-    <!-- Navigation Buttons -->
-    <div style="margin-top: 20px;">
-        <a href="{% url 'store:main_cart_page' %}">
-            <button>🛒 View Cart</button>
-        </a>
-
-        <a href="{% url 'store:product_page' %}">
-            <button>🔍 Search Product</button>
-        </a>
     </div>
+{% else %}
+    <div class="alert alert-info">No products available.</div>
+{% endif %}
 
-    <div style="margin-top: 20px;">
-        <a href="{% url 'authenticator:welcome' %}">
-            <button>🏠 Back Home</button>
-        </a>
-    </div>
-
-</body>
-</html>
+<a href="{% url 'authenticator:welcome' %}" class="btn btn-outline-dark mt-2">🏠 Home</a>
+{% endblock %}

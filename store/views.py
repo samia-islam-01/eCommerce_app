@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
@@ -11,7 +12,7 @@ from .twitter_utils import tweet_new_product, tweet_new_store
 def is_vendor(user):
     return user.groups.filter(name='Vendors').exists()
 
-# PRODUCTS
+
 @login_required
 def view_product_page(request):
     user = request.user
@@ -64,7 +65,6 @@ def change_product_price(request):
             try:
                 product = Product.objects.get(name=product_name)
 
-                # Check the user is the product's store's owner
                 if not product.store or product.store.owner != request.user:
                     return HttpResponse("Unauthorized")
 
@@ -92,141 +92,11 @@ def change_product_price(request):
 
 
 @login_required
-def retrieve_products(request):
-    products = []
-    session = request.session
-
-    if 'cart' in session:
-        for name, quantity in session['cart'].items():
-            try:
-                product = Product.objects.get(name=name)
-                products.append({'product': product, 'quantity': quantity})
-            except Product.DoesNotExist:
-                # Skip if product not found
-                pass
-
-    return products
-
-
-@login_required
-def list_products(request):
-    products = Product.objects.all()
-    return render(request, 'store/products_list.html', {'products': products})
-
-
-@login_required
-def product_detail(request, product_id):
-    try:
-        product = Product.objects.get(id=product_id)
-    except Product.DoesNotExist:
-        return redirect('store:products_list')
-
-    reviews = product.reviews.all()
-
-    return render(request, 'store/product_detail.html', {
-        'product': product,
-        'reviews': reviews
-    })
-
-@login_required
-def create_product(request):
-    if not is_vendor(request.user):
-        return HttpResponse("Only vendors can create products")
-
-    stores = Store.objects.filter(owner=request.user)
-
-    if request.method == 'POST':
-        store_id = request.POST.get('store')
-
-        try:
-            store = Store.objects.get(id=store_id, owner=request.user)
-        except Store.DoesNotExist:
-            return HttpResponse("Invalid store selection")
-
-        product = Product.objects.create(
-            store=store,
-            name=request.POST.get('name'),
-            description=request.POST.get('description'),
-            image=request.FILES.get('image'),
-            price=request.POST.get('price'),
-            stock=request.POST.get('stock')
-        )
-
-        try:
-            tweet_new_product(product)
-
-        except Exception as e:
-            print(e)
-
-        return redirect('store:my_products')
-
-    return render(request, 'store/create_product.html', {'stores': stores})
-
-
-@login_required
-def delete_product(request, product_id):
-    if not is_vendor(request.user):
-        return HttpResponse("Only vendors can delete products")
-
-    try:
-        product = Product.objects.get(id=product_id)
-    except Product.DoesNotExist:
-        return HttpResponse("Product not found")
-
-    if not product.store or product.store.owner != request.user:
-        return HttpResponse("Unauthorized")
-
-    product.delete()
-    return redirect('store:my_products')
-
-
-@login_required
-def edit_product(request, product_id):
-
-    if not is_vendor(request.user):
-        return HttpResponse("Only vendors can edit products")
-
-    try:
-        product = Product.objects.get(id=product_id)
-    except Product.DoesNotExist:
-        return HttpResponse("Product not found")
-
-    if not product.store or product.store.owner != request.user:
-        return HttpResponse("Unauthorized")
-
-    if request.method == 'POST':
-        product.name = request.POST.get('name')
-        product.description = request.POST.get('description')
-        product.image = request.FILES.get('image')
-        product.price = request.POST.get('price')
-        product.stock = request.POST.get('stock')
-        product.save()
-
-        return redirect('store:my_products')
-
-    return render(request, 'store/edit_product.html', {'product': product})
-
-@login_required
-def my_products(request):
-
-    # Only vendors can access
-    if not is_vendor(request.user):
-        return HttpResponse("Only vendors can view products")
-
-    # Only show products owned by this user
-    products = Product.objects.filter(store__owner=request.user)
-
-    return render(request, 'store/my_products.html', {
-        'products': products
-    })
-
-
-# CART & CHECKOUT
-@login_required
 def add_item_to_cart(request):
     item = request.POST.get('item')
     quantity = request.POST.get('quantity')
 
+    # If either is missing, redirect to cart page without changing anything
     if not item or not quantity:
         return redirect('store:main_cart_page')
 
@@ -252,6 +122,23 @@ def add_item_to_cart(request):
 
 
 @login_required
+def retrieve_products(request):
+    products = []
+    session = request.session
+
+    if 'cart' in session:
+        for name, quantity in session['cart'].items():
+            try:
+                product = Product.objects.get(name=name)
+                products.append({'product': product, 'quantity': quantity})
+            except Product.DoesNotExist:
+                # Skip if product not found
+                pass
+
+    return products
+
+
+@login_required
 def show_user_cart(request):
     cart_items = retrieve_products(request)
 
@@ -265,6 +152,30 @@ def show_user_cart(request):
     return render(request, 'store/main_cart_page.html', {
         'cart': cart_items,
         'total_price': total_price,
+    })
+
+
+@login_required
+def list_products(request):
+    products = Product.objects.all()
+    return render(request, 'store/products_list.html', {
+        'products': products,
+        'is_vendor': is_vendor(request.user),
+    })
+
+
+@login_required
+def product_detail(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return redirect('store:products_list')
+
+    reviews = product.reviews.all()
+
+    return render(request, 'store/product_detail.html', {
+        'product': product,
+        'reviews': reviews
     })
 
 
@@ -307,14 +218,40 @@ def checkout(request):
             'total_price': total
         })
 
-    # Confirm checkout
+    cart_items = []
+    stock_errors = []
+
+    for name, qty in cart.items():
+        # Validate product existence and stock
+        try:
+            product = Product.objects.get(name=name)
+        except Product.DoesNotExist:
+            continue
+        if qty > product.stock:
+            stock_errors.append(
+                f"{product.name}: requested {qty}, only {product.stock} in stock."
+            )
+        cart_items.append({'product': product, 'quantity': qty})
+
+    if stock_errors:
+        total = sum(i['product'].price * i['quantity'] for i in cart_items)
+        return render(request, 'store/checkout.html', {
+            'cart': cart_items,
+            'total_price': total,
+            'stock_errors': stock_errors,
+        })
+
     items = []
     total = 0
 
-    for name, qty in cart.items():
-        product = Product.objects.get(name=name)
+    for item in cart_items:
+        product = item['product']
+        qty = item['quantity']
         subtotal = product.price * qty
         total += subtotal
+
+        product.stock -= qty
+        product.save()
 
         items.append({
             "name": product.name,
@@ -344,7 +281,7 @@ def checkout(request):
     send_mail(
         'Your Order Invoice',
         message,
-        'samia14islam@gmail.com',
+        settings.DEFAULT_FROM_EMAIL,
         [request.user.email],
     )
 
@@ -357,7 +294,6 @@ def checkout(request):
     })
 
 
-# REVIEWS
 @login_required
 def add_review(request, product_id):
     if request.method == 'POST':
@@ -385,7 +321,84 @@ def add_review(request, product_id):
         return redirect('store:product_detail', product_id=product_id)
 
 
-# STORES
+@login_required
+def create_product(request):
+
+    if not is_vendor(request.user):
+        return HttpResponse("Only vendors can create products")
+
+    stores = Store.objects.filter(owner=request.user)
+
+    if request.method == 'POST':
+        store_id = request.POST.get('store')
+
+        try:
+            store = Store.objects.get(id=store_id, owner=request.user)
+        except Store.DoesNotExist:
+            return HttpResponse("Invalid store selection")
+
+        product = Product.objects.create(
+            store=store,
+            name=request.POST.get('name'),
+            description=request.POST.get('description'),
+            price=request.POST.get('price'),
+            stock=request.POST.get('stock'),
+            image=request.FILES.get('image') or None,
+        )
+
+        tweet_new_product(product)
+
+        return redirect('store:my_products')
+
+    return render(request, 'store/create_product.html', {'stores': stores})
+
+
+@login_required
+def delete_product(request, product_id):
+
+    if not is_vendor(request.user):
+        return HttpResponse("Only vendors can delete products")
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return HttpResponse("Product not found")
+
+    if not product.store or product.store.owner != request.user:
+        return HttpResponse("Unauthorized")
+
+    product.delete()
+    return redirect('store:my_products')
+
+
+@login_required
+def edit_product(request, product_id):
+
+    if not is_vendor(request.user):
+        return HttpResponse("Only vendors can edit products")
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return HttpResponse("Product not found")
+
+    if not product.store or product.store.owner != request.user:
+        return HttpResponse("Unauthorized")
+
+    if request.method == 'POST':
+        product.name = request.POST.get('name')
+        product.description = request.POST.get('description')
+        product.price = request.POST.get('price')
+        product.stock = request.POST.get('stock')
+        if request.FILES.get('image'):
+            product.image = request.FILES.get('image')
+        product.save()
+
+        return redirect('store:my_products')
+
+    return render(request, 'store/edit_product.html', {'product': product})
+
+
 @login_required
 def my_stores(request):
     stores = Store.objects.filter(owner=request.user)
@@ -399,27 +412,23 @@ def create_store(request):
 
     if request.method == 'POST':
         name = request.POST.get('name')
-        description = request.POST.get('description')
-        logo = request.FILES.get('logo')
 
         if not name:
             return render(request, 'store/create_store.html', {
                 'error': 'Store name is required'
             })
 
+        description = request.POST.get('description', '')
+        logo = request.FILES.get('logo') or None
+
         store = Store.objects.create(
             name=name,
-            description=description,
             owner=request.user,
-            logo=logo
+            description=description,
+            logo=logo,
         )
 
-        try:
-            tweet_new_store(store)
-
-        except Exception as e:
-            print(e)
-
+        tweet_new_store(store)
 
         return redirect('store:my_stores')
 
@@ -441,11 +450,9 @@ def edit_store(request, store_id):
 
     if request.method == 'POST':
         store.name = request.POST.get('name')
-        store.description = request.POST.get('description')
-
+        store.description = request.POST.get('description', '')
         if request.FILES.get('logo'):
             store.logo = request.FILES.get('logo')
-
         store.save()
         return redirect('store:my_stores')
 
@@ -465,7 +472,6 @@ def delete_store(request, store_id):
     if store.owner != request.user:
         return HttpResponse("Unauthorized")
 
-
     if request.method == 'POST':
         try:
             store.delete()
@@ -474,3 +480,18 @@ def delete_store(request, store_id):
             return HttpResponse(f"Error deleting store: {e}")
 
     return HttpResponse("Invalid request method")
+
+
+@login_required
+def my_products(request):
+
+    # Only vendors can access
+    if not is_vendor(request.user):
+        return HttpResponse("Only vendors can view products")
+
+    # Only show products owned by this user
+    products = Product.objects.filter(store__owner=request.user)
+
+    return render(request, 'store/my_products.html', {
+        'products': products
+    })

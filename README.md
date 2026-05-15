@@ -100,25 +100,29 @@ media/store_logos/
 ```
 Environment Variables
 
-The project uses a .env file for X API credentials.
+The project uses a .env file for X API credentials and Email Host Users.
 Example:
 ```
-X_API_KEY=api_key
-X_API_SECRET=api_secret
-X_ACCESS_TOKEN=access_token
-X_ACCESS_SECRET=access_secret
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_password
+
+X_API_KEY=your_api_key
+X_API_SECRET=your_api_secret
+X_ACCESS_TOKEN=your_access_token
+X_ACCESS_SECRET=your_access_secret
 ```
 This has been changed to .env.example
 
 ```
 📁 Project Structure
-eCommerce/
-├── .env
+eCommerce2/
+├── .env.example
 ├── manage.py
 ├── README.md
 ├── requirements.txt
 │
 ├── eCommerce/
+│   ├── asgi.py
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
@@ -142,6 +146,7 @@ eCommerce/
 │
 ├── media/
 │   └── store_logos/
+│   └── product_images/
 │
 └── static/
 ```
@@ -149,8 +154,8 @@ eCommerce/
 ### Setup Instructions
 #### Clone Project
 ```
-git clone <repository_url>
-cd eCommerce2
+git clone https://github.com/samia-islam-01/eCommerce_app
+cd eCommerce
 ```
 #### Create Virtual Environment
 ```
@@ -165,9 +170,14 @@ venv\Scripts\activate
 ```
 pip install -r requirements.txt
 ```
+##### Install and Create MySQL database
+```
+mysql -u root -p
+```
 ##### Run Migrations
 ```
 python manage.py migrate
+python manage.py makemigrations
 ```
 ##### Start Development Server
 ```

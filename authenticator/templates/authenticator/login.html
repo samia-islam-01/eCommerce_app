@@ -1,44 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-    <h2>Login</h2>
-
-    <!-- This form sends login info to the backend using POST -->
-    <form method="POST" action="{% url 'authenticator:login' %}">
-        {% csrf_token %}  <!-- Security token to prevent hacking -->
-
-        <!-- Username input -->
-        <label for="username">Username:</label>
-        <input type="text" name="username" required><br><br>
-
-        <!-- Password input -->
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br><br>
-
-        <!-- Submit button -->
-        <button type="submit">Login</button>
-    </form>
-
-    <!-- If there's an error (like wrong password), show it -->
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-
-    <!-- Link to reset password page -->
-    <p style="margin-top: 10px;">
-        <a href="{% url 'authenticator:request_password_reset' %}">Forgot your password?</a>
-    </p>
-
-    <!-- Link to registration page -->
-    <div style="margin-top: 20px;">
-        <p>Don't have an account?
-            <a href="{% url 'authenticator:register' %}">
-                <button>Register here</button>
-            </a>
-        </p>
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Login</h2>
+                <form method="POST" action="{% url 'authenticator:login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    {% if error %}
+                        <div class="alert alert-danger py-2">{{ error }}</div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <hr>
+                <p class="text-center mb-1">
+                    <a href="{% url 'authenticator:request_password_reset' %}">Forgot your password?</a>
+                </p>
+                <p class="text-center mb-0">
+                    Don't have an account? <a href="{% url 'authenticator:register' %}">Register here</a>
+                </p>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

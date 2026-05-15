@@ -1,72 +1,44 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Products</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}My Products{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">My Products</h1>
+    <a href="{% url 'store:create_product' %}" class="btn btn-primary">➕ Create Product</a>
+</div>
 
-    <h1>My Products</h1>
-
-    <!-- Create new product -->
-    <div style="margin-bottom: 20px;">
-        <a href="{% url 'store:create_product' %}">
-            <button>➕ Create New Product</button>
-        </a>
-    </div>
-
-    {% if products %}
-        <table border="1" cellpadding="10">
-            <tr>
-                <th>Name</th>
-                <th>Store</th>
-                <th>Description</th>
-                <th>Image</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Actions</th>
-            </tr>
-
-            {% for product in products %}
+{% if products %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
                 <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.store }}</td>
-                    <td>{{ product.description }}</td>
-
-                    {% if product.image %}
-                        <td><img src="{{ product.image.url }}" width="50"></td>
-                    {% else %}
-                    <td>No image available</td>
-                    {% endif %}
-
-                    <td>£{{ product.price }}</td>
-                    <td>{{ product.stock }}</td>
-
-                    <td>
-                        <!-- Edit -->
-                        <a href="{% url 'store:edit_product' product.id %}">
-                            <button>Edit</button>
-                        </a>
-
-                        <!-- Delete -->
-                        <a href="{% url 'store:delete_product' product.id %}">
-                            <button style="background-color:red; color:white;">
-                                Delete
-                            </button>
-                        </a>
-                    </td>
+                    <th>Name</th>
+                    <th>Store</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
                 </tr>
-            {% endfor %}
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.store }}</td>
+                        <td>{{ product.description }}</td>
+                        <td>£{{ product.price }}</td>
+                        <td>{{ product.stock }}</td>
+                        <td>
+                            <a href="{% url 'store:edit_product' product.id %}" class="btn btn-warning btn-sm me-1">Edit</a>
+                            <a href="{% url 'store:delete_product' product.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
-    {% else %}
-        <p>You have no products yet.</p>
-    {% endif %}
+    </div>
+{% else %}
+    <div class="alert alert-info">You have no products yet.</div>
+{% endif %}
 
-    <br>
-
-    <!-- Navigation -->
-    <a href="{% url 'authenticator:welcome' %}">
-        <button>🏠 Back to Home</button>
-    </a>
-
-</body>
-</html>
+<a href="{% url 'authenticator:welcome' %}" class="btn btn-outline-dark mt-2">🏠 Home</a>
+{% endblock %}

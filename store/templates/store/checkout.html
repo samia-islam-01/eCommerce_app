@@ -1,45 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Checkout</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h1 class="mb-4">Checkout</h1>
 
-<h1>Checkout</h1>
-
-{% if cart %}
-    <h3>Review Your Order</h3>
-
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-        </tr>
-
-        {% for item in cart %}
-        <tr>
-            <td>{{ item.product.name }}</td>
-            <td>{{ item.quantity }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <p><strong>Total: £{{ total_price }}</strong></p>
-
-    <form method="POST">
-        {% csrf_token %}
-        <button type="submit">Confirm Checkout</button>
-    </form>
-
-{% else %}
-    <p>Your cart is empty.</p>
+{% if stock_errors %}
+    <div class="alert alert-danger">
+        <strong>Cannot complete order — stock issues:</strong>
+        <ul class="mb-0 mt-2">
+            {% for error in stock_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        <hr class="my-2">
+        Please update your cart and try again.
+    </div>
 {% endif %}
 
-<br>
+{% if cart %}
+    <h5 class="mb-3">Review Your Order</h5>
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>In Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>
+                        {% if item.product.stock >= item.quantity %}
+                            <span class="badge bg-success">{{ item.product.stock }}</span>
+                        {% else %}
+                            <span class="badge bg-danger">{{ item.product.stock }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-dark">
+                    <th colspan="2" class="text-end">Total</th>
+                    <th>£{{ total_price }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 
-<a href="{% url 'store:main_cart_page' %}">
-    <button>Back to Cart</button>
-</a>
-
-</body>
-</html>
+    <form method="POST" class="mt-3">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Confirm &amp; Pay</button>
+        <a href="{% url 'store:main_cart_page' %}" class="btn btn-outline-secondary ms-2">Back to Cart</a>
+    </form>
+{% else %}
+    <div class="alert alert-info">Your cart is empty.</div>
+    <a href="{% url 'store:main_cart_page' %}" class="btn btn-outline-secondary">Back to Cart</a>
+{% endif %}
+{% endblock %}

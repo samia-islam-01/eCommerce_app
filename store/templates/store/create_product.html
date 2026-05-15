@@ -1,41 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create Product</title>
-</head>
-<body>
-<h2>Create Product</h2>
-
-<form method="POST">
-    {% csrf_token %}
-
-    <input type="text" name="name" placeholder="Name" required><br><br>
-
-    <textarea name="description" placeholder="Description"></textarea><br><br>
-
-    <input type="file" name="image" placeholder="Image" required><br><br>
-
-    <input type="text" name="price" placeholder="Price" required><br><br>
-
-    <input type="number" name="stock" placeholder="Stock" required><br><br>
-
-    <label>Select Store:</label><br>
-    <select name="store" required>
-        <option value="">-- Select a Store --</option>
-        {% for store in stores %}
-            <option value="{{ store.id }}">{{ store.name }}</option>
-        {% endfor %}
-    </select><br><br>
-
-    <button type="submit">Create Product</button>
-</form>
-
-<br>
-
-<a href="{% url 'store:my_products' %}">
-    <button>Back to My Products</button>
-</a>
-
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Create Product{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Create Product</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Price (&pound;)</label>
+                            <input type="text" name="price" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock</label>
+                            <input type="number" name="stock" class="form-control" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Image <span class="text-muted">(optional)</span></label>
+                        <input type="file" name="image" accept="image/*" class="form-control">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Store</label>
+                        <select name="store" class="form-select" required>
+                            <option value="">-- Select a Store --</option>
+                            {% for store in stores %}
+                                <option value="{{ store.id }}">{{ store.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Product</button>
+                    <a href="{% url 'store:my_products' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,45 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Store</title>
-</head>
-<body>
-
-    <h1>Create a New Store</h1>
-
-    <!-- Error display -->
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
-
-    <!-- Create store form -->
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <label for="name">Store Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
-
-        <label for="description">Description:</label><br>
-        <input type="text" id="description" name="description" required><br><br>
-
-        <label>Logo:</label><br>
-        <input type="file" name="logo"><br><br>
-
-        <button type="submit">Create Store</button>
-    </form>
-
-    <br>
-
-    <!-- Navigation -->
-    <div style="margin-top: 20px;">
-        <a href="{% url 'store:my_stores' %}">
-            <button>🏬 My Stores</button>
-        </a>
-
-        <a href="{% url 'authenticator:welcome' %}">
-            <button>🏠 Back Home</button>
-        </a>
+{% extends 'base.html' %}
+{% block title %}Create Store{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Create a New Store</h2>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Store Name</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Store Logo <span class="text-muted">(optional)</span></label>
+                        <input type="file" name="logo" accept="image/*" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Store</button>
+                    <a href="{% url 'store:my_stores' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
     </div>
-
-</body>
-</html>
+</div>
+{% endblock %}

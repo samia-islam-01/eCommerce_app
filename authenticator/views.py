@@ -29,12 +29,7 @@ def login_user(request):
         if user is not None:
             login(request, user)  # Log the user in and start their session
 
-            # Set the session to expire on 30 Dec 2025 (so user stays logged in until then)
-            exp_date = datetime(2025, 12, 30)
-            now = datetime.now()
-            expiry_seconds = int((exp_date - now).total_seconds())
-            if expiry_seconds > 0:
-                request.session.set_expiry(expiry_seconds)  # Set the expiry time for the session
+            request.session.set_expiry(60 * 60 * 24 * 30)  # 30 days
 
             # Save some user info in the session (optional, but useful)
             request.session['user_id'] = user.id
@@ -66,6 +61,11 @@ def register_user(request):
             })
 
         email = request.POST.get('email')
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'authenticator/register.html', {
+                'error': 'An account with this email address already exists.'
+            })
 
         # Create a new user in the database
         user = User.objects.create_user(username=username, password=password, email=email)

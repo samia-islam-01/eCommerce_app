@@ -3,24 +3,19 @@ from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
 from .models import Product, Review, Store
 from .serializers import ProductSerializer, ReviewSerializer, StoreSerializer
-from .twitter_utils import tweet_new_store, tweet_new_product
 
 
 def _is_vendor(user):
     return user.groups.filter(name='Vendors').exists()
 
 
-# PRODUCTS
+# Products
 
 class ProductListCreateView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
+    def get(self):
         products = Product.objects.prefetch_related('reviews').all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
@@ -43,31 +38,23 @@ class ProductListCreateView(APIView):
 
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
-            product = serializer.save(store=store)
-
-            # Tweet when new product is created
-            tweet_new_product(product)
-
+            serializer.save(store=store)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProductDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def _get_product(self, product_id):
         try:
             return Product.objects.prefetch_related('reviews').get(id=product_id)
         except Product.DoesNotExist:
             return None
 
-
-    def get(self, request, product_id):
+    def get(self, product_id):
         product = self._get_product(product_id)
         if not product:
             return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(ProductSerializer(product).data)
-
 
     def patch(self, request, product_id):
         if not _is_vendor(request.user):
@@ -89,7 +76,6 @@ class ProductDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     def delete(self, request, product_id):
         if not _is_vendor(request.user):
             return Response(
@@ -109,7 +95,6 @@ class ProductDetailView(APIView):
 
 
 class MyProductsView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         if not _is_vendor(request.user):
@@ -121,10 +106,9 @@ class MyProductsView(APIView):
         return Response(ProductSerializer(products, many=True).data)
 
 
-# STORES
+# Stores
 
 class StoreListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         stores = Store.objects.filter(owner=request.user)
@@ -138,17 +122,12 @@ class StoreListCreateView(APIView):
             )
         serializer = StoreSerializer(data=request.data)
         if serializer.is_valid():
-            store = serializer.save(owner=request.user)
-
-            # Tweet when new store is created
-            tweet_new_store(store)
-
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StoreDetailView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def _get_store(self, store_id, user):
         try:
@@ -156,13 +135,11 @@ class StoreDetailView(APIView):
         except Store.DoesNotExist:
             return None
 
-
     def get(self, request, store_id):
         store = self._get_store(store_id, request.user)
         if not store:
             return Response({'error': 'Store not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(StoreSerializer(store).data)
-
 
     def patch(self, request, store_id):
         if not _is_vendor(request.user):
@@ -180,7 +157,6 @@ class StoreDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     def delete(self, request, store_id):
         if not _is_vendor(request.user):
             return Response(
@@ -194,20 +170,9 @@ class StoreDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class StoreProductsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, store_id):
-        products = Product.objects.filter(store_id=store_id)
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
-
-
-# CART
+# Cart
 
 class CartView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
         cart = request.session.get('cart', {})
         items = []
@@ -230,7 +195,6 @@ class CartView(APIView):
 
         return Response({'items': items, 'total': round(total, 2)})
 
-
     def post(self, request):
         name = request.data.get('item')
         if not name:
@@ -250,18 +214,15 @@ class CartView(APIView):
 
         return Response({'cart': cart}, status=status.HTTP_200_OK)
 
-
     def delete(self, request):
         request.session['cart'] = {}
         request.session.modified = True
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# CHECKOUT
+# Checkout
 
 class CheckoutView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
         cart = request.session.get('cart', {})
         if not cart:
@@ -284,7 +245,7 @@ class CheckoutView(APIView):
                 'subtotal': round(subtotal, 2),
             })
 
-        # Record purchased products
+        # Record purchased products for verified review eligibility
         purchased = request.session.get('purchased_products', [])
         for name in cart:
             if name not in purchased:
@@ -313,11 +274,9 @@ class CheckoutView(APIView):
         )
 
 
-# REVIEWS
+# Reviews
 
 class ReviewCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, product_id):
         try:
             product = Product.objects.get(id=product_id)
