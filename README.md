@@ -115,7 +115,7 @@ This has been changed to .env.example
 
 ```
 📁 Project Structure
-eCommerce2/
+eCommerce_app/
 ├── .env.example
 ├── manage.py
 ├── README.md
