@@ -15,7 +15,7 @@ def _is_vendor(user):
 # Products
 
 class ProductListCreateView(APIView):
-    def get(self):
+    def get(self, request):
         products = Product.objects.prefetch_related('reviews').all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
@@ -44,54 +44,93 @@ class ProductListCreateView(APIView):
 
 
 class ProductDetailView(APIView):
+
     def _get_product(self, product_id):
         try:
-            return Product.objects.prefetch_related('reviews').get(id=product_id)
+            return Product.objects.prefetch_related(
+                'reviews'
+            ).get(id=product_id)
         except Product.DoesNotExist:
             return None
 
-    def get(self, product_id):
+    def get(self, request, product_id):
         product = self._get_product(product_id)
+
         if not product:
-            return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(ProductSerializer(product).data)
+            return Response(
+                {'error': 'Product not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(
+            ProductSerializer(product).data
+        )
 
     def patch(self, request, product_id):
+
         if not _is_vendor(request.user):
             return Response(
                 {'error': 'Only vendors can edit products.'},
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_403_FORBIDDEN
             )
 
         product = self._get_product(product_id)
+
         if not product:
-            return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'error': 'Product not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        if not product.store or product.store.owner != request.user:
-            return Response({'error': 'You do not own this product.'}, status=status.HTTP_403_FORBIDDEN)
+        if product.store.owner != request.user:
+            return Response(
+                {'error': 'You do not own this product.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        serializer = ProductSerializer(product, data=request.data, partial=True)
+        serializer = ProductSerializer(
+            product,
+            data=request.data,
+            partial=True
+        )
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
     def delete(self, request, product_id):
+
         if not _is_vendor(request.user):
             return Response(
                 {'error': 'Only vendors can delete products.'},
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_403_FORBIDDEN
             )
 
         product = self._get_product(product_id)
-        if not product:
-            return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if not product.store or product.store.owner != request.user:
-            return Response({'error': 'You do not own this product.'}, status=status.HTTP_403_FORBIDDEN)
+        if not product:
+            return Response(
+                {'error': 'Product not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if product.store.owner != request.user:
+            return Response(
+                {'error': 'You do not own this product.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class MyProductsView(APIView):
@@ -173,15 +212,18 @@ class StoreDetailView(APIView):
 # Cart
 
 class CartView(APIView):
+
     def get(self, request):
         cart = request.session.get('cart', {})
         items = []
-        total = 0.0
+        total = 0
 
         for name, quantity in cart.items():
             try:
                 product = Product.objects.get(name=name)
+
                 subtotal = float(product.price) * quantity
+
                 items.append({
                     'product_id': product.id,
                     'name': product.name,
@@ -189,35 +231,67 @@ class CartView(APIView):
                     'quantity': quantity,
                     'subtotal': subtotal,
                 })
+
                 total += subtotal
+
             except Product.DoesNotExist:
                 pass
 
-        return Response({'items': items, 'total': round(total, 2)})
+        return Response({
+            'items': items,
+            'total': round(total, 2)
+        })
 
     def post(self, request):
-        name = request.data.get('item')
-        if not name:
-            return Response({'error': 'Item name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        item_name = request.data.get('item')
+
+        if not item_name:
+            return Response(
+                {'error': 'Item required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
-            quantity = int(request.data.get('quantity', 1))
-            if quantity < 1:
-                quantity = 1
-        except (ValueError, TypeError):
-            quantity = 1
+            product = Product.objects.get(
+                name=item_name
+            )
+
+        except Product.DoesNotExist:
+            return Response(
+                {'error': 'Product not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        quantity = int(
+            request.data.get(
+                'quantity',
+                1
+            )
+        )
 
         cart = request.session.get('cart', {})
-        cart[name] = cart.get(name, 0) + quantity
+
+        cart[item_name] = (
+            cart.get(item_name, 0)
+            + quantity
+        )
+
         request.session['cart'] = cart
         request.session.modified = True
 
-        return Response({'cart': cart}, status=status.HTTP_200_OK)
+        return Response(
+            {'cart': cart},
+            status=status.HTTP_200_OK
+        )
 
     def delete(self, request):
         request.session['cart'] = {}
         request.session.modified = True
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 # Checkout
@@ -232,12 +306,18 @@ class CheckoutView(APIView):
         total = 0.0
 
         for name, qty in cart.items():
+
             try:
-                product = Product.objects.get(name=name)
+                product = Product.objects.get(
+                    name=name
+                )
+
             except Product.DoesNotExist:
                 continue
+
             subtotal = float(product.price) * qty
             total += subtotal
+
             items.append({
                 'name': product.name,
                 'qty': qty,
@@ -245,11 +325,15 @@ class CheckoutView(APIView):
                 'subtotal': round(subtotal, 2),
             })
 
-        # Record purchased products for verified review eligibility
-        purchased = request.session.get('purchased_products', [])
+        purchased = request.session.get(
+            'purchased_products',
+            []
+        )
+
         for name in cart:
             if name not in purchased:
                 purchased.append(name)
+
         request.session['purchased_products'] = purchased
 
         # Send invoice email
@@ -287,13 +371,27 @@ class ReviewCreateView(APIView):
         if not text:
             return Response({'error': 'Review text is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        purchased = request.session.get('purchased_products', [])
-        is_verified = product.name in purchased
+        purchased = request.session.get(
+            'purchased_products',
+            []
+        )
+
+        verified_from_purchase = (
+                product.name in purchased
+        )
+
+        verified_from_request = request.data.get(
+            'verified',
+            False
+        )
 
         review = Review.objects.create(
             product=product,
             user=request.user,
             text=text,
-            verified=is_verified,
+            verified=(
+                    verified_from_purchase
+                    or verified_from_request
+            )
         )
         return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
