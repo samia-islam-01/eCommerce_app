@@ -64,9 +64,11 @@ http://127.0.0.1:8000/register/
 Choose either:
 * Buyer
 * Vendor
+
 After registering, log in with your account.
 #### Step 2: Obtain authentication credentials
 This project uses Django authentication. Users must log in before accessing protected API endpoints.
+
 If using Session Authentication:
 1. Start the server:
 ```
@@ -77,6 +79,7 @@ python manage.py runserver
 http://127.0.0.1:8000/login/
 ```
 3. Log in with your credentials
+
 The browser session will then be authenticated
 ### Testing the API with Postman
 Some API endpoints are protected and require authentication. If authentication is not provided, requests may return:
@@ -106,19 +109,25 @@ Go to:
 http://127.0.0.1:8000/login/
 ```
 Log in using the account you created.
+
 Once logged in, Django creates a session.
 #### Step 4: Obtain session authentication values
 Because the project uses Django Session Authentication, Postman needs your browser session information.
+
 After logging in:
 
 1. Press F12 in your browser / Inspect element
 2. Open:
 Application → Cookies
+
 (or Storage → Cookies depending on browser)
+
 Locate:
 * sessionid
 * csrftoken
+
 Copy both values.
+
 Example:
 ```
 sessionid=abc123xyz456
@@ -206,6 +215,7 @@ X-CSRFToken: your_csrf_token
 
 ### Media Uploads
 Store logos are uploaded using Django media handling.
+
 Uploaded images are stored inside:
 ```
 media/store_logos/
