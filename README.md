@@ -54,6 +54,30 @@ It includes user authentication, vendor stores, products, REST API functionality
   * product name
   * product description
 * Integrated using Tweepy and X API v2
+### API Authentication
+The API endpoints are protected and require authentication before they can be accessed.
+#### Step 1: Register a user
+Create an account through the registration page:
+```
+http://127.0.0.1:8000/register/
+```
+Choose either:
+* Buyer
+* Vendor
+After registering, log in with your account.
+### Step 2: Obtain authentication credentials
+This project uses Django authentication. Users must log in before accessing protected API endpoints.
+If using Session Authentication:
+1. Start the server:
+```
+python manage.py runserver
+```
+2. Open
+```
+http://127.0.0.1:8000/login/
+```
+3. Log in with your credentials
+The browser session will then be authenticated
 ### API Endpoints
 #### Products
 | Method | Endpoint	| Description                              |
