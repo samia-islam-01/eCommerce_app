@@ -65,7 +65,7 @@ Choose either:
 * Buyer
 * Vendor
 After registering, log in with your account.
-### Step 2: Obtain authentication credentials
+#### Step 2: Obtain authentication credentials
 This project uses Django authentication. Users must log in before accessing protected API endpoints.
 If using Session Authentication:
 1. Start the server:
@@ -92,7 +92,7 @@ The application should now be available at:
 ```
 http://127.0.0.1:8000/
 ```
-### Step 2: (if no current account) Create an account
+#### Step 2: (if no current account) Create an account
 Open the registration page:
 ```
 http://127.0.0.1:8000/register/
@@ -100,23 +100,21 @@ http://127.0.0.1:8000/register/
 Create a new account and choose a role:
 * Buyer
 * Vendor
-### Step 3: Log in
+#### Step 3: Log in
 Go to:
 ```
 http://127.0.0.1:8000/login/
 ```
 Log in using the account you created.
 Once logged in, Django creates a session.
-### Step 4: Obtain session authentication values
+#### Step 4: Obtain session authentication values
 Because the project uses Django Session Authentication, Postman needs your browser session information.
 After logging in:
 
 1. Press F12 in your browser / Inspect element
 2. Open:
-```
 Application → Cookies
 (or Storage → Cookies depending on browser)
-```
 Locate:
 * sessionid
 * csrftoken
@@ -133,7 +131,7 @@ Example:
 GET
 http://127.0.0.1:8000/ecommerce/my-products/
 ```
-### Step 6: Add authentication headers
+#### Step 6: Add authentication headers
 Open the Headers tab and add:
 | Key | Value |
 |------|--------|
@@ -141,13 +139,13 @@ Open the Headers tab and add:
 | X-CSRFToken | gh789example |
 
 Replace with your own values.
-### Step 7: Test GET requests
+#### Step 7: Test GET requests
 Example:
 ```
 GET
 http://127.0.0.1:8000/ecommerce/my-products/
 ```
-### Step 8: Test POST requests
+#### Step 8: Test POST requests
 Example:
 ```
 POST
@@ -167,33 +165,6 @@ Headers:
 ```
 Cookie: sessionid=your_session_id
 X-CSRFToken: your_csrf_token
-```
-### Example API Endpoints
-
-* View products:
-```
-GET
-http://127.0.0.1:8000/ecommerce/
-```
-* Create product:
-```
-POST
-http://127.0.0.1:8000/ecommerce/create/
-```
-* View cart:
-```
-GET
-http://127.0.0.1:8000/ecommerce/cart/
-```
-* Checkout:
-```
-POST
-http://127.0.0.1:8000/ecommerce/checkout/
-```
-* Create store:
-```
-POST
-http://127.0.0.1:8000/ecommerce/stores/create/
 ```
 ### API Endpoints
 #### Products
