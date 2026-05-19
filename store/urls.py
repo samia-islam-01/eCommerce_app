@@ -5,7 +5,7 @@ app_name = 'store'
 
 urlpatterns = [
     # Home page: Shows the list of all products
-    path('', views.list_products, name='products_list'),
+    path('login/', views.list_products, name='products_list'),
 
     # Page to view details about a specific product (with a search form)
     path('product/', views.view_product_page, name='product_page'),
