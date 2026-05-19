@@ -78,6 +78,123 @@ http://127.0.0.1:8000/login/
 ```
 3. Log in with your credentials
 The browser session will then be authenticated
+### Testing the API with Postman
+Some API endpoints are protected and require authentication. If authentication is not provided, requests may return:
+```
+403 Forbidden
+```
+This is expected behaviour and prevents unauthorised users from accessing protected functionality.
+#### Step 1: Run the Django server
+```
+python manage.py runserver
+```
+The application should now be available at:
+```
+http://127.0.0.1:8000/
+```
+### Step 2: (if no current account) Create an account
+Open the registration page:
+```
+http://127.0.0.1:8000/register/
+```
+Create a new account and choose a role:
+* Buyer
+* Vendor
+### Step 3: Log in
+Go to:
+```
+http://127.0.0.1:8000/login/
+```
+Log in using the account you created.
+Once logged in, Django creates a session.
+### Step 4: Obtain session authentication values
+Because the project uses Django Session Authentication, Postman needs your browser session information.
+After logging in:
+
+1. Press F12 in your browser / Inspect element
+2. Open:
+```
+Application → Cookies
+(or Storage → Cookies depending on browser)
+```
+Locate:
+* sessionid
+* csrftoken
+Copy both values.
+Example:
+```
+sessionid=abc123xyz456
+csrftoken=gh789example
+```
+### Step 5: Open Postman
+Create a new request.
+Example:
+```
+GET
+http://127.0.0.1:8000/ecommerce/my-products/
+```
+### Step 6: Add authentication headers
+Open the Headers tab and add:
+| Key | Value |
+|------|--------|
+| Cookie | sessionid=abc123xyz456, csrftoken= gh789example|
+| X-CSRFToken | gh789example |
+
+Replace with your own values.
+### Step 7: Test GET requests
+Example:
+```
+GET
+http://127.0.0.1:8000/ecommerce/my-products/
+```
+### Step 8: Test POST requests
+Example:
+```
+POST
+http://127.0.0.1:8000/ecommerce/create/
+```
+Body → form-data:
+| Key | Value |
+|------|--------|
+| name | Gaming Mouse |
+| description | Wireless mouse |
+| price | 30 |
+| stock | 15 |
+| store | 1 |
+
+Required authentication:
+Headers:
+```
+Cookie: sessionid=your_session_id
+X-CSRFToken: your_csrf_token
+```
+### Example API Endpoints
+
+* View products:
+```
+GET
+http://127.0.0.1:8000/ecommerce/
+```
+* Create product:
+```
+POST
+http://127.0.0.1:8000/ecommerce/create/
+```
+* View cart:
+```
+GET
+http://127.0.0.1:8000/ecommerce/cart/
+```
+* Checkout:
+```
+POST
+http://127.0.0.1:8000/ecommerce/checkout/
+```
+* Create store:
+```
+POST
+http://127.0.0.1:8000/ecommerce/stores/create/
+```
 ### API Endpoints
 #### Products
 | Method | Endpoint	| Description                              |
