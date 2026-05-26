@@ -5,7 +5,7 @@ app_name = 'authenticator'
 
 urlpatterns = [
     # Default page: login form
-    path('login/', views.login_user, name='login'),
+    path('', views.login_user, name='login'),
 
     # Registration page where users can sign up
     path('register/', views.register_user, name='register'),
